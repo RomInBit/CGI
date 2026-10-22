@@ -34,11 +34,42 @@ public class Main extends Application {
 
             Circle point = new Circle(x, y, 4, Color.RED);
             root.getChildren().add(point);
+
+            if (points.size() >= 2) {
+                double calculatedY = calculateLagrange(x);
+                System.out.println("Текущий X: " + x);
+                System.out.println("Реальный Y клика: " + y);
+                System.out.println("Y по полиному Лагранжа: " + calculatedY);
+            }
         });
 
         Scene scene = new Scene(root, 800, 600);
         stage.setScene(scene);
         stage.show();
+    }
+
+    private double calculateLagrange(double x){
+        double result = 0.0;
+        int n = points.size();
+
+        for (int i = 0; i < n; i++){
+            double xi = points.get(i).getX();
+            double yi = points.get(i).getY();
+            double li = 1.0;
+
+            for (int j = 0; j < n; j++){
+                if (j != i){
+                    double xj = points.get(j).getX();
+
+                    if(xi - xj != 0){
+                        li *= (x - xj) / (xi - xj);
+
+                    }
+                }
+            }
+            result += yi * li;
+        }
+        return result;
     }
 
     public static void main(String[] args) {
