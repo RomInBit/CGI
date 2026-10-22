@@ -9,19 +9,21 @@ import javafx.stage.Stage;
 import javafx.scene.input.MouseEvent;
 
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 
 public class Main extends Application {
 
     private final List<Point2D> points = new ArrayList<>();
-    private final Polyline userLine = new Polyline();
+    private final Polyline lagrangeCurve = new Polyline();
 
     @Override
     public void start(Stage stage) {
         Pane root = new Pane();
 
-        userLine.setStroke(Color.GREY);
-        root.getChildren().add(userLine);
+        lagrangeCurve.setStroke(Color.BLACK);
+        lagrangeCurve.setStrokeWidth(2);
+        root.getChildren().addAll( lagrangeCurve);
 
         root.setOnMouseClicked((MouseEvent event) -> {
             double x = event.getX();
@@ -29,21 +31,18 @@ public class Main extends Application {
 
             Point2D newPoint = new Point2D(x,y);
             points.add(newPoint);
-
-            userLine.getPoints().addAll(x,y);
+            points.sort(Comparator.comparingDouble(Point2D::getX));
 
             Circle point = new Circle(x, y, 4, Color.RED);
             root.getChildren().add(point);
 
             if (points.size() >= 2) {
-                double calculatedY = calculateLagrange(x);
-                System.out.println("Текущий X: " + x);
-                System.out.println("Реальный Y клика: " + y);
-                System.out.println("Y по полиному Лагранжа: " + calculatedY);
+                updateLagrangeCurve();
             }
         });
 
         Scene scene = new Scene(root, 800, 600);
+        stage.setTitle("Полином Лагранжа");
         stage.setScene(scene);
         stage.show();
     }
@@ -70,6 +69,20 @@ public class Main extends Application {
             result += yi * li;
         }
         return result;
+    }
+
+    private  void updateLagrangeCurve(){
+        lagrangeCurve.getPoints().clear();
+
+        double startX = points.get(0).getX();
+        double endX = points.get(points.size() - 1).getX();
+
+        if(startX == endX) return;
+
+        for (double x = startX; x <= endX; x += 1.0){
+            double y = calculateLagrange(x);
+            lagrangeCurve.getPoints().addAll(x, y);
+        }
     }
 
     public static void main(String[] args) {
